@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Compras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .category {
+      margin-bottom: 20px;
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .category h2 {
+      margin-top: 0;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+
+    .item span {
+      flex: 1;
+      margin-left: 10px;
+    }
+
+    .checked {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    button {
+      margin-left: 5px;
+      background: #22c55e;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .remove {
+      background: #ef4444;
+    }
+
+    .add-box {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #finishBtn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 18px;
+      background: #3b82f6;
+    }
+
+    /* Animação final */
+    #celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000dd;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 40px;
+    }
+
+    .penguin {
+      font-size: 80px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🛒 Lista de Compras</h1>
+
+  <div id="list"></div>
+
+  <button id="finishBtn">Finalizar Compras</button>
+</div>
+
+<div id="celebration">
+  <div class="penguin">🐧👍</div>
+  <div>Parabéns!</div>
+</div>
+
+<script>
+const defaultData = {
+  "Café da manhã": ["Iogurte", "Leite", "Leite em pó", "Café solúvel", "Banana", "Maçã verde"],
+  "Refeições": ["Tomate", "Cebola", "Batata", "Alho", "Repolho", "Mignon suíno", "Carne moída", "Hambúrguer", "Salsicha", "Ovo", "Queijo"],
+  "Massas": ["Cabelinho de anjo"],
+  "Bebidas": ["Chá de maracujá e morango"],
+  "Extras": ["Chocolate em pó", "Mostarda", "Limão", "Maracujá"]
+};
+
+let data = JSON.parse(localStorage.getItem("lista")) || defaultData;
+
+function save() {
+  localStorage.setItem("lista", JSON.stringify(data));
+}
+
+function render() {
+  const container = document.getElementById("list");
+  container.innerHTML = "";
+
+  for (let category in data) {
+    const div = document.createElement("div");
+    div.className = "category";
+
+    const title = document.createElement("h2");
+    title.innerText = category;
+
+    div.appendChild(title);
+
+    data[category].forEach((item, index) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+
+      const span = document.createElement("span");
+      span.innerText = item;
+
+      checkbox.onchange = () => {
+        span.classList.toggle("checked");
+      };
+
+      const removeBtn = document.createElement("button");
+      removeBtn.innerText = "X";
+      removeBtn.className = "remove";
+      removeBtn.onclick = () => {
+        data[category].splice(index, 1);
+        save();
+        render();
+      };
+
+      itemDiv.appendChild(checkbox);
+      itemDiv.appendChild(span);
+      itemDiv.appendChild(removeBtn);
+
+      div.appendChild(itemDiv);
+    });
+
+    // Adicionar item
+    const addBox = document.createElement("div");
+    addBox.className = "add-box";
+
+    const input = document.createElement("input");
+    input.placeholder = "Novo item...";
+
+    const addBtn = document.createElement("button");
+    addBtn.innerText = "+";
+    addBtn.onclick = () => {
+      if (input.value.trim() !== "") {
+        data[category].push(input.value);
+        input.value = "";
+        save();
+        render();
+      }
+    };
+
+    addBox.appendChild(input);
+    addBox.appendChild(addBtn);
+
+    div.appendChild(addBox);
+
+    container.appendChild(div);
+  }
+}
+
+// Finalizar compras
+document.getElementById("finishBtn").onclick = () => {
+  document.getElementById("celebration").style.display = "flex";
+};
+
+render();
+</script>
+
+</body>
+</html>
